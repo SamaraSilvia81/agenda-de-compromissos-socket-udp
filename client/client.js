@@ -2,7 +2,7 @@ import dgram from 'dgram'; // UDP: Import the 'dgram' module instead of 'net'
 import { createInterface } from 'readline';
 import { processUserInput } from './commandHandler.js';
 import { handleError } from './errorHandler.js';
-import { showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from './messages.js';
+import { showStartupAnimation, showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from './messages.js';
 
 // --- Configuration ---
 // UDP: These are now the destination address for datagrams, not for a persistent connection
@@ -107,8 +107,10 @@ rl.on('line', (line) => {
   }
 });
 
-// --- Initial "Connection" ---
+// --- Client Startup ---
 // UDP: No connection is needed. Start the prompt directly.
-console.clear();
-showWelcomeMessage();
-rl.prompt();
+showStartupAnimation(() => {
+    console.clear();
+    showWelcomeMessage();
+    rl.prompt();
+});

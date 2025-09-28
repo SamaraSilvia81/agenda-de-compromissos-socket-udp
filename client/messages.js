@@ -1,11 +1,11 @@
-export function showConnectionAnimation(onComplete) {
+export function showStartupAnimation(onComplete) {
   console.clear();
   const artLines = [
     '+--------------------------------------------------+',
     '|                                                   |',
-    '|           [~] Initializing SOCKET-TCP...          |', 
-    '|           [V] Connection Established.             |', 
-    '|           [>] Listening for commands...           |', 
+    '|           [~] Initializing SOCKET-UDP...          |', 
+    '|           [V] Client is ready.                    |', 
+    '|           [>] Waiting for commands...             |', 
     '|                                                   |',
     '+--------------------------------------------------+',
     ''
