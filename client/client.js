@@ -6,8 +6,8 @@ import { showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from './me
 
 // --- Configuration ---
 // UDP: These are now the destination address for datagrams, not for a persistent connection
-// const HOST = '127.0.0.1';
-// const PORT = 3000;
+const HOST = '127.0.0.1';
+const PORT = 3000;
 
 // --- Initialization ---
 // UDP: Create a UDP4 socket (datagram socket)
@@ -20,10 +20,10 @@ rl.setPrompt('\n> ');
 client.on('message', (data, rinfo) => {
   // rinfo (remote info) contains the sender's address and port
   const serverResponse = data.toString();
-  console.log(`\nResposta recebida de ${rinfo.address}:${rinfo.port}:`);
+  console.log(`\nResponse received from ${rinfo.address}:${rinfo.port}:`);
   try {
     const jsonResponse = JSON.parse(serverResponse);
-    if (jsonResponse.status === 'SUCESSO' && Array.isArray(jsonResponse.dados)) {
+    if (jsonResponse.status === 'SUCESS' && Array.isArray(jsonResponse.dados)) {
       console.table(jsonResponse.dados);
     } else {
       console.log(jsonResponse);
@@ -73,8 +73,17 @@ rl.on('line', (line) => {
   const result = processUserInput(input);
 
   if (result.success) {
-    console.log(`[DEBUG] Command formatted: "${result.commandToSend.trim()}"`);
-    client.write(result.commandToSend);
+    // Using client.send() with the server address.
+    const command = result.commandToSend;
+    client.send(command, PORT, HOST, (err) => {
+        if (err) {
+            handleError('SEND_ERROR', err);
+            rl.prompt();
+        } else {
+            console.log(`[INFO] Comando enviado para o servidor: "${command.trim()}"`);
+            // Now we wait for the response in the 'message' event (or a timeout)
+        }
+    });
   } else if (result.errorCode) {
     handleError(result.errorCode);
     rl.prompt();
