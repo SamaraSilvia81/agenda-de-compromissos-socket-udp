@@ -18,18 +18,24 @@ rl.setPrompt('\n> ');
 
 let timeoutId = null;
 
+// --- Stats Timeout ---
+let commandsSent = 0;
+let responsesReceived = 0;
+let timeoutsOccurred = 0;
+
 // --- Client Event Handlers ---
 // UDP: Listen for the 'message' event, which is the equivalent of the TCP 'data' event
 client.on('message', (data, rinfo) => {
- 
   clearTimeout(timeoutId);
+  responsesReceived++;
 
   // rinfo (remote info) contains the sender's address and port
   const serverResponse = data.toString();
   console.log(`\nResponse received from ${rinfo.address}:${rinfo.port}:`);
   try {
     const jsonResponse = JSON.parse(serverResponse);
-    if (jsonResponse.status === 'SUCESS' && Array.isArray(jsonResponse.dados)) {
+    // Note: Checking for 'SUCCESS', assuming server sends the English version
+    if (jsonResponse.status === 'SUCCESS' && Array.isArray(jsonResponse.dados)) {
       console.table(jsonResponse.dados);
     } else {
       console.log(jsonResponse);
@@ -43,12 +49,12 @@ client.on('message', (data, rinfo) => {
 
 // UDP: The 'close' event fires when the socket is closed locally
 client.on('close', () => {
-  console.log('🔌 Socket do cliente fechado.');
+  console.log('🔌 Client socket closed.');
   process.exit();
 });
 
 client.on('error', (err) => {
-  handleError('SOCKET_ERROR', err); 
+  handleError('SOCKET_ERROR', err);
   client.close();
 });
 
@@ -61,6 +67,12 @@ rl.on('line', (line) => {
     if (commandUpper === 'HELP') { showCommandTutorial(); rl.prompt(); }
     if (commandUpper === 'CLEAR') { console.clear(); showWelcomeMessage(); rl.prompt(); }
     if (commandUpper === 'EXIT') {
+      console.clear();
+      console.log("\n---------- UDP Session Report ----------");
+      console.log(`| Commands Sent:      ${commandsSent}`);
+      console.log(`| Responses Received: ${responsesReceived}`);
+      console.log(`| Timeouts Occurred:  ${timeoutsOccurred}`);
+      console.log("--------------------------------------");
       showGoodbyeScreen();
       setTimeout(() => { client.close(); rl.close(); }, 500);
     }
@@ -73,17 +85,19 @@ rl.on('line', (line) => {
     // Using client.send() with the server address.
     const command = result.commandToSend;
     client.send(command, PORT, HOST, (err) => {
-        if (err) {
-            handleError('SEND_ERROR', err);
-            rl.prompt();
-        } else {
-           console.log(`[INFO] Command sent... awaiting response for up to ${TIMEOUT_SECONDS} seconds...`);
+      if (err) {
+        handleError('SEND_ERROR', err);
+        rl.prompt();
+      } else {
+        commandsSent++;
+        console.log(`[INFO] Command sent... awaiting response for up to ${TIMEOUT_SECONDS} seconds...`);
 
-           timeoutId = setTimeout(() => {
-              handleError('TIMEOUT_ERROR');
-              rl.prompt(); // Allows the user to try another command
-            }, TIMEOUT_SECONDS * 1000);
-        }
+        timeoutId = setTimeout(() => {
+          timeoutsOccurred++;
+          handleError('TIMEOUT_ERROR');
+          rl.prompt(); // Allows the user to try another command
+        }, TIMEOUT_SECONDS * 1000);
+      }
     });
   } else if (result.errorCode) {
     handleError(result.errorCode);
