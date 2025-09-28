@@ -6,8 +6,8 @@ import { showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from './me
 
 // --- Configuration ---
 // UDP: These are now the destination address for datagrams, not for a persistent connection
-const HOST = '127.0.0.1';
-const PORT = 3000;
+// const HOST = '127.0.0.1';
+// const PORT = 3000;
 
 // --- Initialization ---
 // UDP: Create a UDP4 socket (datagram socket)
