@@ -1,0 +1,28 @@
+image: node:20
+
+pipelines:
+  default:
+    - parallel:
+        - step:
+            name: Build and Test
+            caches:
+              - node
+            script:
+              - yarn install
+              - yarn test
+        - step:
+            name: Code Linting
+            caches:
+              - node
+            script:
+              - yarn install
+              - yarn eslint .
+    - step:
+        name: Mirror to GitHub
+        script:
+          - mkdir -p ~/.ssh
+          - echo "${SSH_KEY}" | base64 --decode > ~/.ssh/id_rsa
+          - chmod 600 ~/.ssh/id_rsa
+          - ssh-keyscan github.com >> ~/.ssh/known_hosts
+          - git remote add github-mirror git@github.com:SamaraSilvia81/agenda-de-compromissos-socket-udp.git
+          - git push --all github-mirror
