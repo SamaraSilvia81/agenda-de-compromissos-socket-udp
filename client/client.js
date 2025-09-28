@@ -8,6 +8,7 @@ import { showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from './me
 // UDP: These are now the destination address for datagrams, not for a persistent connection
 const HOST = '127.0.0.1';
 const PORT = 3000;
+const TIMEOUT_SECONDS = 5; // Waiting time for server response
 
 // --- Initialization ---
 // UDP: Create a UDP4 socket (datagram socket)
@@ -15,9 +16,14 @@ const client = dgram.createSocket('udp4');
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 rl.setPrompt('\n> ');
 
+let timeoutId = null;
+
 // --- Client Event Handlers ---
 // UDP: Listen for the 'message' event, which is the equivalent of the TCP 'data' event
 client.on('message', (data, rinfo) => {
+ 
+  clearTimeout(timeoutId);
+
   // rinfo (remote info) contains the sender's address and port
   const serverResponse = data.toString();
   console.log(`\nResponse received from ${rinfo.address}:${rinfo.port}:`);
@@ -51,22 +57,13 @@ rl.on('line', (line) => {
   const input = line.trim();
   const commandUpper = input.split(' ')[0].toUpperCase();
 
-  if (commandUpper === 'HELP') {
-    showCommandTutorial();
-    rl.prompt();
-    return;
-  }
-  if (commandUpper === 'CLEAR') {
-    showWelcomeMessage();
-    rl.prompt();
-    return;
-  }
- if (commandUpper === 'EXIT') {
-    showGoodbyeScreen();
-    setTimeout(() => {
-        client.close();
-        rl.close();
-    }, 500);
+  if (['HELP', 'CLEAR', 'EXIT'].includes(commandUpper)) {
+    if (commandUpper === 'HELP') { showCommandTutorial(); rl.prompt(); }
+    if (commandUpper === 'CLEAR') { console.clear(); showWelcomeMessage(); rl.prompt(); }
+    if (commandUpper === 'EXIT') {
+      showGoodbyeScreen();
+      setTimeout(() => { client.close(); rl.close(); }, 500);
+    }
     return;
   }
 
@@ -80,8 +77,12 @@ rl.on('line', (line) => {
             handleError('SEND_ERROR', err);
             rl.prompt();
         } else {
-            console.log(`[INFO] Comando enviado para o servidor: "${command.trim()}"`);
-            // Now we wait for the response in the 'message' event (or a timeout)
+           console.log(`[INFO] Command sent... awaiting response for up to ${TIMEOUT_SECONDS} seconds...`);
+
+           timeoutId = setTimeout(() => {
+              handleError('TIMEOUT_ERROR');
+              rl.prompt(); // Allows the user to try another command
+            }, TIMEOUT_SECONDS * 1000);
         }
     });
   } else if (result.errorCode) {

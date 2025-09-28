@@ -22,10 +22,20 @@ export function handleError(errorCode, originalError = null) {
     case 'INVALID_DELETE_FORMAT':
       userMessage = '❌ Incorrect format. Use: DELETE <id>';
       break;
-    case 'CONNECTION_ERROR':
-      userMessage = `❌ Connection error: ${originalError.message}`;
-      break;
+    // --- ADD TO UDP ---
+    case 'SEND_ERROR':
+        userMessage = `❌ Error sending message to server. Check your connection.`;
+        break;
+    case 'TIMEOUT_ERROR':
+        userMessage = `😥 O servidor não respondeu a tempo. A mensagem pode ter se perdido.`;
+        break;
+    case 'SOCKET_ERROR':
+        userMessage = `❌ An error occurred in the client socket.`;
+        break;
   }
 
   console.error(userMessage);
+  if (originalError) {
+      console.error(`[Debug Info]: ${originalError.message}`);
+  }
 }
