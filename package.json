@@ -2,6 +2,9 @@
   "name": "pd-02-agenda-socket-udp",
   "version": "1.0.0",
   "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
   "repository": "https://samarasilviadev@bitbucket.org/ufpe-plataformas-dist-2025/pd-02-agenda-socket-udp.git",
   "author": "SamaraSilvia81 <samarasilvia.dev@gmail.com>",
   "license": "MIT",
