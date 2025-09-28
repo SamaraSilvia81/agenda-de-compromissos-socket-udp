@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "date": "2025-12-25",
+    "time": "20:00",
+    "duration": 180,
+    "title": "Ceia de Natal",
+    "description": "Comprar presentes"
+  },
+  {
+    "id": 2,
+    "date": "2025-12-26",
+    "time": "09:00",
+    "duration": 60,
+    "title": "Trocar presentes",
+    "description": "Ir ao shopping"
+  }
+]
