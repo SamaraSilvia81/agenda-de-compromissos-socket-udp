@@ -61,8 +61,7 @@ Appointment data is persisted to an `appointments.json` file on the server-side,
     ```
     After connecting, a `>` prompt will appear, ready to receive your commands.
 
-
-<p align="center">
+<div style="text-align: center; font-family: monospace; white-space: pre;">
 ```text
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -72,7 +71,7 @@ Appointment data is persisted to an `appointments.json` file on the server-side,
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 ```
-</p>
+</div>
 
 ## Available Commands
 
