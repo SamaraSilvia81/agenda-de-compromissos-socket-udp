@@ -10,13 +10,12 @@ export default defineConfig([
     },
     extends: ["js/recommended"],
     languageOptions: {
-      // ✅ CORREÇÃO: Reconhece ambos os ambientes
+      // ✅ A linha correta que inclui AMBOS os ambientes
       globals: {
         ...globals.browser,
-        ...globals.node, // Essencial para o server.js
+        ...globals.node,
       },
     },
-    // Mantém a regra para variáveis não utilizadas
     rules: {
       "no-unused-vars": [
         "error",
