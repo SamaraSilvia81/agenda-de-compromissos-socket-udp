@@ -95,13 +95,12 @@ function handleAdd(fullCommand, rinfo) {
 
 function handleList(fullCommand, rinfo) {
     const parts = fullCommand.trim().split(' ');
-    const filterArgument = parts[1]; // pode ser "ALL" ou "yyyy-mm-dd"
+    const filterArgument = parts[1]; // pode ser "ALL" or "yyyy-mm-dd"
 
     let results = appointments;
 
     if (filterArgument && filterArgument.toUpperCase() !== 'ALL') {
         try {
-            // tenta dividir a data em ano, mês e dia
             const [fYear, fMonth, fDay] = filterArgument.split('-').map(Number);
 
             results = appointments.filter(app => {
@@ -109,6 +108,7 @@ function handleList(fullCommand, rinfo) {
                 return aYear === fYear && aMonth === fMonth && aDay === fDay;
             });
         } catch (e) {
+            console.error('Error parsing date:', e);
             results = [];
         }
     }
