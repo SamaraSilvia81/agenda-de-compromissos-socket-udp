@@ -57,8 +57,72 @@ export function showCommandTutorial() {
   console.log("------------------------------------------------");
 }
 
+export function playTimeoutAnimationInBox(finalLines, onComplete) {
+
+  const targetMessage = 'SERVER NOT RESPONDING';
+  const charSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#$*!?<>+';
+  const animationDuration = 2000;
+  const revealSpeed = 80;
+
+  let intervalId;
+
+  const drawBoxWithContent = (contentLines) => {
+    const terminalWidth = process.stdout.columns || 70;
+    const boxWidth = Math.min(70, terminalWidth - 4);
+    const topBorder = '+' + '-'.repeat(boxWidth - 2) + '+';
+    const bottomBorder = topBorder;
+    const emptyLine = '|' + ' '.repeat(boxWidth - 2) + '|';
+    const centerText = (text) => {
+      const padding = Math.floor((boxWidth - 2 - text.length) / 2);
+      const remainder = (boxWidth - 2 - text.length) % 2;
+      return '|' + ' '.repeat(padding) + text + ' '.repeat(padding + remainder) + '|';
+    };
+
+    console.clear(); 
+    
+    const frame = [
+      '\n',
+      topBorder,
+      emptyLine,
+      ...contentLines.map(line => centerText(line)),
+      emptyLine,
+      bottomBorder
+    ];
+    
+    process.stdout.write(frame.join('\n'));
+  };
+
+  const reveal = (index = 0) => {
+    if (index > targetMessage.length) {
+      setTimeout(() => {
+        // A lógica final para desenhar a mensagem estática não muda.
+        drawBoxWithContent(finalLines);
+        console.log('');
+        onComplete();
+      }, 2000);
+      return;
+    }
+
+    const revealedPart = targetMessage.substring(0, index);
+    const scrambledPart = Array(targetMessage.length - index).fill(null).map(() => 
+        charSet[Math.floor(Math.random() * charSet.length)]
+    ).join('');
+    
+    drawBoxWithContent([revealedPart + scrambledPart]);
+    setTimeout(() => reveal(index + 1), revealSpeed);
+  };
+
+  // REMOVIDO: O console.log inicial com vários '\n' não é mais necessário.
+  // A animação começa imediatamente.
+  intervalId = setInterval(() => drawBoxWithContent([' ']), 50);
+
+  setTimeout(() => {
+    clearInterval(intervalId);
+    reveal();
+  }, animationDuration);
+}
+
 export function showGoodbyeScreen() {
-  console.clear();
   console.log("+--------------------------------------------------+");
   console.log("|                                                  |");
   console.log("|             [!] Disconnecting...                 |");

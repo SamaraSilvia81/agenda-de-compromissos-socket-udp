@@ -8,7 +8,7 @@ import { showStartupAnimation, showWelcomeMessage, showCommandTutorial, showGood
 // UDP: These are now the destination address for datagrams, not for a persistent connection
 const HOST = '127.0.0.1';
 const PORT = 3000;
-const TIMEOUT_SECONDS = 5; // Waiting time for server response
+const TIMEOUT_SECONDS = 2; // Waiting time for server response
 
 // --- Initialization ---
 // UDP: Create a UDP4 socket (datagram socket)
@@ -68,11 +68,13 @@ rl.on('line', (line) => {
     if (commandUpper === 'CLEAR') { console.clear(); showWelcomeMessage(); rl.prompt(); }
     if (commandUpper === 'EXIT') {
       console.clear();
+      const sessionReport = [
+        { Metric: 'Commands Sent',      Value: commandsSent },
+        { Metric: 'Responses Received', Value: responsesReceived },
+        { Metric: 'Timeouts Occurred',  Value: timeoutsOccurred }
+      ];
       console.log("\n---------- UDP Session Report ----------");
-      console.log(`| Commands Sent:      ${commandsSent}`);
-      console.log(`| Responses Received: ${responsesReceived}`);
-      console.log(`| Timeouts Occurred:  ${timeoutsOccurred}`);
-      console.log("--------------------------------------");
+      console.table(sessionReport);
       showGoodbyeScreen();
       setTimeout(() => { client.close(); rl.close(); }, 500);
     }
@@ -95,7 +97,7 @@ rl.on('line', (line) => {
         timeoutId = setTimeout(() => {
           timeoutsOccurred++;
           handleError('TIMEOUT_ERROR');
-          rl.prompt(); // Allows the user to try another command
+          rl.prompt();
         }, TIMEOUT_SECONDS * 1000);
       }
     });

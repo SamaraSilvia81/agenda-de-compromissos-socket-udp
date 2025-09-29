@@ -1,5 +1,3 @@
-// server/server.js
-
 import net from 'net';
 import fs from 'fs'; // Import the File System module
 import path from 'path'; // Import Path module for reliable file paths
@@ -89,8 +87,6 @@ function handleList(fullCommand, socket) {
 
             results = appointments.filter(app => {
                 const [aYear, aMonth, aDay] = app.date.split('-').map(Number);
-                
-                // CORREÇÃO AQUI 👇
                 return aYear === fYear && aMonth === fMonth && aDay === fDay;
             });
         // eslint-disable-next-line no-unused-vars
@@ -106,7 +102,6 @@ function handleList(fullCommand, socket) {
 }
 
 function handleUpdate(fullCommand, socket) {
-    // ... (logic for handleUpdate is mostly the same)
     const updateRegex = /^UPDATE\s+(\d+)\s+([a-zA-Z]+)\s+"([^"]+)"$/i;
     const match = fullCommand.match(updateRegex);
     if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid UPDATE format. Use: UPDATE <id> <field> "<new_value>"');
@@ -124,7 +119,6 @@ function handleUpdate(fullCommand, socket) {
 }
 
 function handleDelete(fullCommand, socket) {
-    // ... (logic for handleDelete is mostly the same)
     const deleteRegex = /^DELETE\s+(\d+)$/i;
     const match = fullCommand.match(deleteRegex);
     if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid DELETE format. Use: DELETE <id>');

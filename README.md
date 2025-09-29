@@ -1,4 +1,4 @@
-![UDP Socket Appointment Scheduler](banner.png)
+![UDP Socket Appointment Scheduler](assets/banner.png)
 
 # UDP Socket Appointment Scheduler
 ![Badge Concluído](https://img.shields.io/static/v1?label=STATUS&message=In%20Progress&color=af0421&style=for-the-badge)
@@ -28,6 +28,16 @@ Appointment data is persisted to an `appointments.json` file on the server-side,
     - **D**elete
 - **Data Persistence**: The schedule is saved to a JSON file on the server.
 - **Command-Line Interface**: The client provides an interactive prompt for sending commands.
+
+## Handling UDP's Unreliability: The Timeout Logic
+
+A core challenge of using UDP is its "fire-and-forget" nature; it offers no guarantee that a sent packet will reach its destination. A naive implementation would leave the user confused if their command was lost in transit, as the client would wait forever for a response that never comes.
+
+To address this, we implemented a client-side timeout mechanism. This feature is not just an addition, but a direct solution to UDP's inherent unreliability, demonstrating a key concept in distributed systems: **when the transport layer (UDP) doesn't provide a feature, the responsibility moves to the application layer (our code).**
+
+Here’s how it works in practice:
+
+![UDP Socket Timeout](assets/test-implementation-timeout.gif)
 
 ## Prerequisites
 
@@ -84,6 +94,7 @@ All commands must be entered into the client terminal. Arguments containing spac
 | `UPDATE` | Updates a specific field of an existing appointment, identified by its `id`.<br><br>**Updatable fields:**<br>`date`, `time`, `duration`, `title`, `description`. | **Format:**<br>`UPDATE <id> <field> "<new_value>"`<br><br>**Example:**<br>```> UPDATE 1 title "General Project Sync Meeting"``` |
 | `DELETE` | Removes an appointment from the schedule, identified by its `id`. | **Format:**<br>`DELETE <id>`<br><br>**Example:**<br>```> DELETE 2``` |
 
+<br>
 <div style="text-align: center; font-family: monospace; white-space: pre;">
   <a href="https://git.io/typing-svg">
     <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&color=c92c36&width=435&lines=Thanks%20for%20your%20attention!">
