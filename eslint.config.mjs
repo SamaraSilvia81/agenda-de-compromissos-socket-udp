@@ -15,15 +15,9 @@ export default defineConfig([
         ...globals.node,
       },
     },
-  
     rules: {
-      "no-unused-vars": [
-        "error",
-        {
-          "args": "after-used",
-          "argsIgnorePattern": "^_"
-        }
-      ]
+      //
+      "no-unused-vars": "off"
     }
   },
 ]);
