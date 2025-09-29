@@ -54,16 +54,15 @@ function saveAppointmentsToFile() {
     }
 }
 
-// --- Helper Function for Responses (No changes here) ---
+// --- Helper Function for Responses ---
 function sendResponse(socket, status, data, message) {
     const response = { status, dados: data, mensagem: message };
     socket.write(JSON.stringify(response) + '\n');
 }
 
-// --- Command Handlers (with saveAppointmentsToFile calls) ---
+// --- Command Handlers ---
 
 function handleAdd(fullCommand, socket) {
-    // ... (logic for handleAdd is the same)
     const addRegex = /^ADD\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+"([^"]+)"(?:\s+"([^"]+)")?$/i;
     const match = fullCommand.match(addRegex);
     if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid ADD command format. Use: ADD <date> <time> <duration> "<title>" "[description]"');
@@ -71,27 +70,26 @@ function handleAdd(fullCommand, socket) {
     const newAppointment = { id: nextAppointmentId++, date, time, duration: parseInt(duration, 10), title, description: description || '' };
     appointments.push(newAppointment);
     console.log('[INFO] New appointment added:', newAppointment);
-    saveAppointmentsToFile(); // <-- SAVE AFTER ADDING
+    saveAppointmentsToFile();
     sendResponse(socket, 'SUCESSO', newAppointment, 'Appointment added successfully.');
 }
 
 function handleList(fullCommand, socket) {
     const parts = fullCommand.split(' ');
     const filterArgument = parts[1];
-
     let results = appointments;
 
     if (filterArgument && filterArgument.toUpperCase() !== 'ALL') {
         try {
             const [fYear, fMonth, fDay] = filterArgument.split('-').map(Number);
-
             results = appointments.filter(app => {
                 const [aYear, aMonth, aDay] = app.date.split('-').map(Number);
                 return aYear === fYear && aMonth === fMonth && aDay === fDay;
             });
-        // A variável 'e' foi renomeada para '_e' para indicar que não é utilizada,
-        // alinhando-se à regra "argsIgnorePattern": "^_" no arquivo eslint.config.mjs.
-        } catch (_e) {
+        // SOLUTION: Disable the 'no-unused-vars' rule for the next line.
+        // This is the definitive fix to prevent the pipeline error, as the error variable 'e' is intentionally not used.
+        // eslint-disable-next-line no-unused-vars
+        } catch (e) {
             results = [];
         }
     }
@@ -115,7 +113,7 @@ function handleUpdate(fullCommand, socket) {
     if (!updatableFields.includes(fieldLower)) return sendResponse(socket, 'ERRO', null, `Invalid field '${field}'.`);
     appointment[fieldLower] = fieldLower === 'duration' ? parseInt(newValue, 10) : newValue;
     console.log(`[INFO] Appointment ${id} updated:`, appointment);
-    saveAppointmentsToFile(); // <-- SAVE AFTER UPDATING
+    saveAppointmentsToFile();
     sendResponse(socket, 'SUCESSO', appointment, `Appointment ${id} updated successfully.`);
 }
 
@@ -128,11 +126,11 @@ function handleDelete(fullCommand, socket) {
     if (appointmentIndex === -1) return sendResponse(socket, 'ERRO', null, `Appointment with ID ${id} not found.`);
     const deletedAppointment = appointments.splice(appointmentIndex, 1);
     console.log(`[INFO] Appointment ${id} deleted.`);
-    saveAppointmentsToFile(); // <-- SAVE AFTER DELETING
+    saveAppointmentsToFile();
     sendResponse(socket, 'SUCESSO', deletedAppointment[0], `Appointment ${id} deleted successfully.`);
 }
 
-// --- Main Command Router (No changes here) ---
+// --- Main Command Router ---
 function handleCommand(command, socket) {
     const [commandVerb] = command.split(' ');
     switch (commandVerb.toUpperCase()) {
@@ -144,7 +142,7 @@ function handleCommand(command, socket) {
     }
 }
 
-// --- Server Creation (No changes here) ---
+// --- Server Creation ---
 const server = net.createServer((socket) => {
     const clientId = `${socket.remoteAddress}:${socket.remotePort}`;
     console.log(`[INFO] Client connected: ${clientId}`);
@@ -159,7 +157,7 @@ const server = net.createServer((socket) => {
 });
 
 // --- Start Listening ---
-loadAppointmentsFromFile(); // <-- LOAD DATA BEFORE STARTING
+loadAppointmentsFromFile(); // Load data before starting
 server.listen(PORT, HOST, () => {
     console.log(`[INFO] TCP Scheduler Server started and listening on ${HOST}:${PORT}`);
 });

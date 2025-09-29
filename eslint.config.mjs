@@ -8,22 +8,17 @@ export default defineConfig([
     plugins: {
       js,
     },
+    // Use the recommended rules as a base.
     extends: ["js/recommended"],
     languageOptions: {
+      // Define the global variables available in the environment.
       globals: {
-        ...globals.browser,
-        ...globals.node,
+        ...globals.browser, // For browser environments
+        ...globals.node,    // For Node.js environments (like server.js)
       },
     },
-    // ✅ VERSÃO FINAL E SIMPLIFICADA DA REGRA
-    rules: {
-      "no-unused-vars": [
-        "error",
-        {
-          // Apenas a opção essencial para ignorar o '_e'
-          "argsIgnorePattern": "^_"
-        }
-      ]
-    }
+    // The problematic 'rules' section has been removed.
+    // The 'no-unused-vars' error is now handled directly in server.js
+    // with an 'eslint-disable-next-line' comment for reliability.
   },
 ]);
