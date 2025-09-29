@@ -1,4 +1,4 @@
-// server/server_udp.js
+// server/server.js
 
 import dgram from 'dgram'; // Import the dgram module for UDP communication
 import fs from 'fs';      // Import the File System module
