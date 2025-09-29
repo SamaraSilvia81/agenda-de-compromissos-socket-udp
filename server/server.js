@@ -94,11 +94,29 @@ function handleAdd(fullCommand, rinfo) {
 }
 
 function handleList(fullCommand, rinfo) {
-    const parts = fullCommand.split(' ');
-    const filterDate = parts[1];
+    const parts = fullCommand.trim().split(' ');
+    const filterArgument = parts[1]; // pode ser "ALL" ou "yyyy-mm-dd"
+
     let results = appointments;
-    if (filterDate) results = appointments.filter(app => app.date === filterDate);
-    if (results.length === 0) return sendResponse(rinfo, 'SUCCESS', [], 'No appointments found for the specified criteria.');
+
+    if (filterArgument && filterArgument.toUpperCase() !== 'ALL') {
+        try {
+            // tenta dividir a data em ano, mês e dia
+            const [fYear, fMonth, fDay] = filterArgument.split('-').map(Number);
+
+            results = appointments.filter(app => {
+                const [aYear, aMonth, aDay] = app.date.split('-').map(Number);
+                return aYear === fYear && aMonth === fMonth && aDay === fDay;
+            });
+        } catch (e) {
+            results = [];
+        }
+    }
+
+    if (results.length === 0) {
+        return sendResponse(rinfo, 'SUCCESS', [], 'No appointments found for the specified criteria.');
+    }
+
     sendResponse(rinfo, 'SUCCESS', results, `${results.length} appointment(s) found.`);
 }
 
