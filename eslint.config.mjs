@@ -1,25 +1,30 @@
-// eslint.config.mjs
-
 import js from "@eslint/js";
 import globals from "globals";
+import { defineConfig } from "eslint/config";
 
-export default [
+export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs}"],
+    plugins: {
+      js,
+    },
+    extends: ["js/recommended"],
     languageOptions: {
-      // It's good practice to specify the ECMAScript version
-      ecmaVersion: 2022, 
-      // Your project uses ES modules
-      sourceType: "module", 
+      // CORREÇÃO: Adiciona os globais do Node.js de volta
       globals: {
-        // THIS IS THE FIX: It tells ESLint to recognize Node.js global variables
-        ...globals.node, 
+        ...globals.browser,
+        ...globals.node, // Essencial para reconhecer 'process', 'require', etc.
       },
     },
-    // You can add recommended rule sets here if needed
-    // extends: ["js/recommended"], 
+    // Mantém a regra corrigida anteriormente para variáveis não utilizadas
     rules: {
-      // You can add any custom rules here if you wish
-    }
+      "no-unused-vars": [
+        "error",
+        {
+          args: "after-used",
+          argsIgnorePattern: "^_", // Ignora argumentos que começam com '_'
+        },
+      ],
+    },
   },
-];
+]);
