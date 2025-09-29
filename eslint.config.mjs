@@ -10,10 +10,10 @@ export default defineConfig([
     },
     extends: ["js/recommended"],
     languageOptions: {
-      // ✅ A linha correta que inclui AMBOS os ambientes
+      // A configuração correta que inclui Node.js
       globals: {
         ...globals.browser,
-        ...globals.node,
+        ...globals.node, 
       },
     },
     rules: {
