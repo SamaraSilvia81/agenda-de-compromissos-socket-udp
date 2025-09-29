@@ -33,7 +33,7 @@ export function showWelcomeMessage() {
   console.log(" Teacher: Nelson Souto (nsr@cin.ufpe.br)");
   console.log(" Authors: Samara Silvia (sssc@cin.ufpe.br)");
   console.log("          Rodolfo Marinho (armc2@cin.ufpe.br)");
-  console.log("\n Title: TCP Socket Appointment Scheduler v1.0");
+  console.log("\n Title: UDP Socket Appointment Scheduler v1.0");
   console.log("\n Description:");
   console.log("   This is a command-line interface (CLI) application that acts as a");
   console.log("   client for a shared scheduling system. It communicates with a");
