@@ -15,9 +15,15 @@ export default defineConfig([
         ...globals.node,
       },
     },
+    // ✅ VERSÃO FINAL E SIMPLIFICADA DA REGRA
     rules: {
-      //
-      "no-unused-vars": "off"
+      "no-unused-vars": [
+        "error",
+        {
+          // Apenas a opção essencial para ignorar o '_e'
+          "argsIgnorePattern": "^_"
+        }
+      ]
     }
   },
 ]);
