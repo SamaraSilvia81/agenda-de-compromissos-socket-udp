@@ -1,6 +1,8 @@
-import net from 'net';
-import fs from 'fs'; // Import the File System module
-import path from 'path'; // Import Path module for reliable file paths
+// server/server_udp.js
+
+import dgram from 'dgram'; // Import the dgram module for UDP communication
+import fs from 'fs';      // Import the File System module
+import path from 'path';    // Import the Path module for reliable file paths
 
 // --- Configuration ---
 const PORT = 3000;
@@ -54,110 +56,117 @@ function saveAppointmentsToFile() {
     }
 }
 
-// --- Helper Function for Responses ---
-function sendResponse(socket, status, data, message) {
+// --- Helper Function for Responses (UDP version) ---
+/**
+ * Sends a response back to the client's address.
+ * @param {object} rinfo - Remote address information (from dgram 'message' event).
+ * @param {string} status - 'SUCCESS' or 'ERROR'.
+ * @param {object|array|null} data - The payload of the response.
+ * @param {string} message - A descriptive message.
+ */
+function sendResponse(rinfo, status, data, message) {
+    // The client expects 'dados', so we will use that key.
     const response = { status, dados: data, mensagem: message };
-    socket.write(JSON.stringify(response) + '\n');
+    const responseBuffer = Buffer.from(JSON.stringify(response));
+
+    // Use server.send() to reply to the specific client address and port.
+    server.send(responseBuffer, rinfo.port, rinfo.address, (err) => {
+        if (err) {
+            console.error(`[ERROR] Failed to send response to ${rinfo.address}:${rinfo.port}`, err);
+        }
+    });
 }
 
-// --- Command Handlers ---
 
-function handleAdd(fullCommand, socket) {
+// --- Command Handlers (UDP version) ---
+// Note: They now receive 'rinfo' to know where to send the response.
+
+function handleAdd(fullCommand, rinfo) {
     const addRegex = /^ADD\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+"([^"]+)"(?:\s+"([^"]+)")?$/i;
     const match = fullCommand.match(addRegex);
-    if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid ADD command format. Use: ADD <date> <time> <duration> "<title>" "[description]"');
+    if (!match) return sendResponse(rinfo, 'ERROR', null, 'Invalid ADD command format. Use: ADD <date> <time> <duration> "<title>" "[description]"');
     const [, date, time, duration, title, description] = match;
     const newAppointment = { id: nextAppointmentId++, date, time, duration: parseInt(duration, 10), title, description: description || '' };
     appointments.push(newAppointment);
     console.log('[INFO] New appointment added:', newAppointment);
     saveAppointmentsToFile();
-    sendResponse(socket, 'SUCESSO', newAppointment, 'Appointment added successfully.');
+    sendResponse(rinfo, 'SUCCESS', newAppointment, 'Appointment added successfully.');
 }
 
-function handleList(fullCommand, socket) {
+function handleList(fullCommand, rinfo) {
     const parts = fullCommand.split(' ');
-    const filterArgument = parts[1];
+    const filterDate = parts[1];
     let results = appointments;
-
-    if (filterArgument && filterArgument.toUpperCase() !== 'ALL') {
-        try {
-            const [fYear, fMonth, fDay] = filterArgument.split('-').map(Number);
-            results = appointments.filter(app => {
-                const [aYear, aMonth, aDay] = app.date.split('-').map(Number);
-                return aYear === fYear && aMonth === fMonth && aDay === fDay;
-            });
-        // SOLUTION: Disable the 'no-unused-vars' rule for the next line.
-        // This is the definitive fix to prevent the pipeline error, as the error variable 'e' is intentionally not used.
-        // eslint-disable-next-line no-unused-vars
-        } catch (e) {
-            results = [];
-        }
-    }
-
-    if (results.length === 0) {
-        return sendResponse(socket, 'SUCESSO', [], 'No appointments found for the specified criteria.');
-    }
-    sendResponse(socket, 'SUCESSO', results, `${results.length} appointment(s) found.`);
+    if (filterDate) results = appointments.filter(app => app.date === filterDate);
+    if (results.length === 0) return sendResponse(rinfo, 'SUCCESS', [], 'No appointments found for the specified criteria.');
+    sendResponse(rinfo, 'SUCCESS', results, `${results.length} appointment(s) found.`);
 }
 
-function handleUpdate(fullCommand, socket) {
+function handleUpdate(fullCommand, rinfo) {
     const updateRegex = /^UPDATE\s+(\d+)\s+([a-zA-Z]+)\s+"([^"]+)"$/i;
     const match = fullCommand.match(updateRegex);
-    if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid UPDATE format. Use: UPDATE <id> <field> "<new_value>"');
+    if (!match) return sendResponse(rinfo, 'ERROR', null, 'Invalid UPDATE format. Use: UPDATE <id> <field> "<new_value>"');
     const [, idStr, field, newValue] = match;
     const id = parseInt(idStr, 10);
     const appointment = appointments.find(app => app.id === id);
-    if (!appointment) return sendResponse(socket, 'ERRO', null, `Appointment with ID ${id} not found.`);
+    if (!appointment) return sendResponse(rinfo, 'ERROR', null, `Appointment with ID ${id} not found.`);
     const updatableFields = ['date', 'time', 'duration', 'title', 'description'];
     const fieldLower = field.toLowerCase();
-    if (!updatableFields.includes(fieldLower)) return sendResponse(socket, 'ERRO', null, `Invalid field '${field}'.`);
+    if (!updatableFields.includes(fieldLower)) return sendResponse(rinfo, 'ERROR', null, `Invalid field '${field}'.`);
     appointment[fieldLower] = fieldLower === 'duration' ? parseInt(newValue, 10) : newValue;
     console.log(`[INFO] Appointment ${id} updated:`, appointment);
     saveAppointmentsToFile();
-    sendResponse(socket, 'SUCESSO', appointment, `Appointment ${id} updated successfully.`);
+    sendResponse(rinfo, 'SUCCESS', appointment, `Appointment ${id} updated successfully.`);
 }
 
-function handleDelete(fullCommand, socket) {
+function handleDelete(fullCommand, rinfo) {
     const deleteRegex = /^DELETE\s+(\d+)$/i;
     const match = fullCommand.match(deleteRegex);
-    if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid DELETE format. Use: DELETE <id>');
+    if (!match) return sendResponse(rinfo, 'ERROR', null, 'Invalid DELETE format. Use: DELETE <id>');
     const id = parseInt(match[1], 10);
     const appointmentIndex = appointments.findIndex(app => app.id === id);
-    if (appointmentIndex === -1) return sendResponse(socket, 'ERRO', null, `Appointment with ID ${id} not found.`);
+    if (appointmentIndex === -1) return sendResponse(rinfo, 'ERROR', null, `Appointment with ID ${id} not found.`);
     const deletedAppointment = appointments.splice(appointmentIndex, 1);
     console.log(`[INFO] Appointment ${id} deleted.`);
     saveAppointmentsToFile();
-    sendResponse(socket, 'SUCESSO', deletedAppointment[0], `Appointment ${id} deleted successfully.`);
+    sendResponse(rinfo, 'SUCCESS', deletedAppointment[0], `Appointment ${id} deleted successfully.`);
 }
 
 // --- Main Command Router ---
-function handleCommand(command, socket) {
+function handleCommand(command, rinfo) {
     const [commandVerb] = command.split(' ');
     switch (commandVerb.toUpperCase()) {
-        case 'ADD': handleAdd(command, socket); break;
-        case 'LIST': handleList(command, socket); break;
-        case 'UPDATE': handleUpdate(command, socket); break;
-        case 'DELETE': handleDelete(command, socket); break;
-        default: sendResponse(socket, 'ERRO', null, `Unknown command: ${commandVerb}`); break;
+        case 'ADD': handleAdd(command, rinfo); break;
+        case 'LIST': handleList(command, rinfo); break;
+        case 'UPDATE': handleUpdate(command, rinfo); break;
+        case 'DELETE': handleDelete(command, rinfo); break;
+        default: sendResponse(rinfo, 'ERROR', null, `Unknown command: ${commandVerb}`); break;
     }
 }
 
-// --- Server Creation ---
-const server = net.createServer((socket) => {
-    const clientId = `${socket.remoteAddress}:${socket.remotePort}`;
-    console.log(`[INFO] Client connected: ${clientId}`);
-    socket.on('data', (data) => {
-        const command = data.toString().trim();
-        if (!command) return;
-        console.log(`[DATA] Received from ${clientId}: "${command}"`);
-        handleCommand(command, socket);
-    });
-    socket.on('close', () => { console.log(`[INFO] Client disconnected: ${clientId}`); });
-    socket.on('error', (err) => { console.error(`[ERROR] Socket error from ${clientId}: ${err.message}`); });
+// --- UDP Server Creation ---
+const server = dgram.createSocket('udp4');
+
+server.on('error', (err) => {
+    console.error(`[ERROR] Server error:\n${err.stack}`);
+    server.close();
+});
+
+// The 'message' event is fired whenever a new datagram is received.
+server.on('message', (msg, rinfo) => {
+    const command = msg.toString().trim();
+    if (!command) return;
+
+    console.log(`[DATA] Received from ${rinfo.address}:${rinfo.port}: "${command}"`);
+    handleCommand(command, rinfo);
+});
+
+// The 'listening' event is fired once the server is ready.
+server.on('listening', () => {
+    const address = server.address();
+    console.log(`[INFO] UDP Scheduler Server started and listening on ${address.address}:${address.port}`);
 });
 
 // --- Start Listening ---
 loadAppointmentsFromFile(); // Load data before starting
-server.listen(PORT, HOST, () => {
-    console.log(`[INFO] TCP Scheduler Server started and listening on ${HOST}:${PORT}`);
-});
+server.bind(PORT, HOST);
