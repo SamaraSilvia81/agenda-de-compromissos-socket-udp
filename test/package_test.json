@@ -1,0 +1,10 @@
+{
+  "name": "agenda-testes",
+  "version": "1.0.0",
+  "description": "Testes de concorrência para sistema de agenda UDP",
+  "scripts": {
+    "test:all": "node test_client_auto.js",
+    "test:server": "node test_server.js",
+    "test:server-crash": "node test_server.js --crash-after 3"
+  }
+}

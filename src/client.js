@@ -1,8 +1,8 @@
 import dgram from 'dgram'; // UDP: Import the 'dgram' module instead of 'net'
 import { createInterface } from 'readline';
-import { processUserInput } from './commandHandler.js';
-import { handleError } from './errorHandler.js';
-import { showStartupAnimation, showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from './messages.js';
+import { processUserInput } from '../client/commandHandler.js';
+import { handleError } from '../client/errorHandler.js';
+import { showStartupAnimation, showWelcomeMessage, showCommandTutorial, showGoodbyeScreen } from '../client/messages.js';
 
 // --- Configuration ---
 // UDP: These are now the destination address for datagrams, not for a persistent connection

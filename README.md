@@ -1,7 +1,7 @@
 ![UDP Socket Appointment Scheduler](assets/banner.png)
 
 # UDP Socket Appointment Scheduler
-![Badge Concluído](https://img.shields.io/static/v1?label=STATUS&message=In%20Progress&color=af0421&style=for-the-badge)
+![Badge Concluído](https://img.shields.io/static/v1?label=STATUS&message=Completed&color=af0421&style=for-the-badge)
 
 This is an academic project developed for the **Plataformas de Distribuição UFPE, 2025.2** course, taught by Professor **Nelson Souto Rosa**. The objective was to adjust in a client-server application in Node.js to manage a real-time appointment schedule using **UDP sockets**, instead of TCP.
 
@@ -60,14 +60,14 @@ Here’s how it works in practice:
 3.  **Start the Server**
     Open a terminal and run the following command. The server will start listening for connections on port 3000.
     ```sh
-    node server/server.js
+    node src/server/server.js
     ```
     You will see a confirmation message: `[INFO] UDP Scheduler Server started and listening on 127.0.0.1:3000`.
 
 4.  **Start the Client**
     Open a **new** terminal (leave the server terminal running) and run the command below.
     ```sh
-    node client/client.js
+    node src/client/client.js
     ```
     After connecting, a `>` prompt will appear, ready to receive your commands.
 
@@ -81,6 +81,48 @@ All commands must be entered into the client terminal. Arguments containing spac
 | `LIST` | Lists all appointments or filters by a specific date. | **Format:**<br>`LIST` or `LIST <date>`<br><br>**Example:**<br>```> LIST\n> LIST 2025-10-26``` |
 | `UPDATE` | Updates a specific field of an existing appointment, identified by its `id`.<br><br>**Updatable fields:**<br>`date`, `time`, `duration`, `title`, `description`. | **Format:**<br>`UPDATE <id> <field> "<new_value>"`<br><br>**Example:**<br>```> UPDATE 1 title "General Project Sync Meeting"``` |
 | `DELETE` | Removes an appointment from the schedule, identified by its `id`. | **Format:**<br>`DELETE <id>`<br><br>**Example:**<br>```> DELETE 2``` |
+
+## Concurrency & Resilience Testing
+
+To validate the server's ability to handle multiple simultaneous clients and ensure the client's timeout logic is robust, a dedicated concurrency testing suite was developed.
+
+This suite automatically simulates various real-world scenarios, runs a battery of tests, and generates a detailed `report.json` file, providing a clear overview of the system's performance and stability under pressure.
+
+### How to Run the Tests
+
+The test suite runs independently of the main server and client.
+
+1.  **Navigate to the Test Directory**
+    ```sh
+    cd test
+    ```
+
+2.  **Execute the Test Script**
+    Run the main test client, which will orchestrate all scenarios automatically.
+    ```sh
+    node test_client_auto.js
+    ```
+
+The script will display real-time logs in the terminal for all simulated users and server interactions. Upon completion, a final report will be shown on the screen, and a detailed `report.json` file will be generated in the `test` directory.
+
+### Test Scenarios Explained
+
+The suite executes 30 tests distributed across three distinct scenarios, each designed to validate a specific aspect of the system.
+
+#### Scenario 1: Stable Server & Normal Load
+* **Goal:** To verify that the server can correctly handle standard CRUD operations from multiple concurrent users without data corruption or errors.
+* **Execution:** 10 simulated users connect at the same time. Each user performs a sequence of `ADD`, `LIST`, `UPDATE`, and `DELETE` commands.
+* **Expected Outcome:** All operations must be processed correctly by the server, and all 10 user tests should pass.
+
+#### Scenario 2: Server Crash Simulation
+* **Goal:** To test the client's resilience and timeout mechanism when the server fails unexpectedly *during* operations.
+* **Execution:** The test server is programmed to shut down after receiving the first 3 commands. Immediately, 10 users attempt to send commands.
+* **Expected Outcome:** The first few commands will succeed, causing the server to crash. All subsequent commands from all clients **must** result in a timeout. A user's test is considered successful if it correctly identifies this timeout. All 10 user tests should pass.
+
+#### Scenario 3: Server Offline Simulation
+* **Goal:** To validate the client's timeout logic when the server is unavailable from the start.
+* **Execution:** 10 users attempt to send commands, but the server process is never started.
+* **Expected Outcome:** Every command from every client must fail with a timeout. A user's test is considered successful if it correctly handles this initial timeout. All 10 user tests should pass.
 
 <br>
 <div style="text-align: center; font-family: monospace; white-space: pre;">
