@@ -10,19 +10,19 @@ export default defineConfig([
     },
     extends: ["js/recommended"],
     languageOptions: {
-      // CORREÇÃO: Adiciona os globais do Node.js de volta
+      // ✅ CORREÇÃO: Reconhece ambos os ambientes
       globals: {
         ...globals.browser,
-        ...globals.node, // Essencial para reconhecer 'process', 'require', etc.
+        ...globals.node, // Essencial para o server.js
       },
     },
-    // Mantém a regra corrigida anteriormente para variáveis não utilizadas
+    // Mantém a regra para variáveis não utilizadas
     rules: {
       "no-unused-vars": [
         "error",
         {
           args: "after-used",
-          argsIgnorePattern: "^_", // Ignora argumentos que começam com '_'
+          argsIgnorePattern: "^_",
         },
       ],
     },
