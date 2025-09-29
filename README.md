@@ -71,18 +71,6 @@ Here’s how it works in practice:
     ```
     After connecting, a `>` prompt will appear, ready to receive your commands.
 
-<div style="text-align: center; font-family: monospace; white-space: pre;">
-```text
-╭──────────────────────────────────────────────────╮
-│                                                  │
-│         [~] Initializing SOCKET-UDP...           │
-│         [✓] Client is ready.                     │
-│         [»] Waiting for commands...              │
-│                                                  │
-╰──────────────────────────────────────────────────╯
-```
-</div>
-
 ## Available Commands
 
 All commands must be entered into the client terminal. Arguments containing spaces (such as title and description) must be enclosed in double quotes (`"`).
