@@ -54,15 +54,26 @@ function saveAppointmentsToFile() {
     }
 }
 
+<<<<<<< HEAD
 // --- Helper Function for Responses ---
+=======
+// --- Helper Function for Responses (No changes here) ---
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
 function sendResponse(socket, status, data, message) {
     const response = { status, dados: data, mensagem: message };
     socket.write(JSON.stringify(response) + '\n');
 }
 
+<<<<<<< HEAD
 // --- Command Handlers ---
 
 function handleAdd(fullCommand, socket) {
+=======
+// --- Command Handlers (with saveAppointmentsToFile calls) ---
+
+function handleAdd(fullCommand, socket) {
+    // ... (logic for handleAdd is the same)
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
     const addRegex = /^ADD\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+"([^"]+)"(?:\s+"([^"]+)")?$/i;
     const match = fullCommand.match(addRegex);
     if (!match) return sendResponse(socket, 'ERRO', null, 'Invalid ADD command format. Use: ADD <date> <time> <duration> "<title>" "[description]"');
@@ -70,24 +81,39 @@ function handleAdd(fullCommand, socket) {
     const newAppointment = { id: nextAppointmentId++, date, time, duration: parseInt(duration, 10), title, description: description || '' };
     appointments.push(newAppointment);
     console.log('[INFO] New appointment added:', newAppointment);
+<<<<<<< HEAD
     saveAppointmentsToFile();
+=======
+    saveAppointmentsToFile(); // <-- SAVE AFTER ADDING
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
     sendResponse(socket, 'SUCESSO', newAppointment, 'Appointment added successfully.');
 }
 
 function handleList(fullCommand, socket) {
     const parts = fullCommand.split(' ');
     const filterArgument = parts[1];
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
     let results = appointments;
 
     if (filterArgument && filterArgument.toUpperCase() !== 'ALL') {
         try {
             const [fYear, fMonth, fDay] = filterArgument.split('-').map(Number);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
             results = appointments.filter(app => {
                 const [aYear, aMonth, aDay] = app.date.split('-').map(Number);
                 return aYear === fYear && aMonth === fMonth && aDay === fDay;
             });
+<<<<<<< HEAD
         // SOLUTION: Disable the 'no-unused-vars' rule for the next line.
         // This is the definitive fix to prevent the pipeline error, as the error variable 'e' is intentionally not used.
+=======
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
         // eslint-disable-next-line no-unused-vars
         } catch (e) {
             results = [];
@@ -113,7 +139,11 @@ function handleUpdate(fullCommand, socket) {
     if (!updatableFields.includes(fieldLower)) return sendResponse(socket, 'ERRO', null, `Invalid field '${field}'.`);
     appointment[fieldLower] = fieldLower === 'duration' ? parseInt(newValue, 10) : newValue;
     console.log(`[INFO] Appointment ${id} updated:`, appointment);
+<<<<<<< HEAD
     saveAppointmentsToFile();
+=======
+    saveAppointmentsToFile(); // <-- SAVE AFTER UPDATING
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
     sendResponse(socket, 'SUCESSO', appointment, `Appointment ${id} updated successfully.`);
 }
 
@@ -126,11 +156,19 @@ function handleDelete(fullCommand, socket) {
     if (appointmentIndex === -1) return sendResponse(socket, 'ERRO', null, `Appointment with ID ${id} not found.`);
     const deletedAppointment = appointments.splice(appointmentIndex, 1);
     console.log(`[INFO] Appointment ${id} deleted.`);
+<<<<<<< HEAD
     saveAppointmentsToFile();
     sendResponse(socket, 'SUCESSO', deletedAppointment[0], `Appointment ${id} deleted successfully.`);
 }
 
 // --- Main Command Router ---
+=======
+    saveAppointmentsToFile(); // <-- SAVE AFTER DELETING
+    sendResponse(socket, 'SUCESSO', deletedAppointment[0], `Appointment ${id} deleted successfully.`);
+}
+
+// --- Main Command Router (No changes here) ---
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
 function handleCommand(command, socket) {
     const [commandVerb] = command.split(' ');
     switch (commandVerb.toUpperCase()) {
@@ -142,7 +180,11 @@ function handleCommand(command, socket) {
     }
 }
 
+<<<<<<< HEAD
 // --- Server Creation ---
+=======
+// --- Server Creation (No changes here) ---
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
 const server = net.createServer((socket) => {
     const clientId = `${socket.remoteAddress}:${socket.remotePort}`;
     console.log(`[INFO] Client connected: ${clientId}`);
@@ -157,7 +199,11 @@ const server = net.createServer((socket) => {
 });
 
 // --- Start Listening ---
+<<<<<<< HEAD
 loadAppointmentsFromFile(); // Load data before starting
+=======
+loadAppointmentsFromFile(); // <-- LOAD DATA BEFORE STARTING
+>>>>>>> 6dba8737c0c15a383f5926dce160adfc7f29212e
 server.listen(PORT, HOST, () => {
     console.log(`[INFO] TCP Scheduler Server started and listening on ${HOST}:${PORT}`);
 });
