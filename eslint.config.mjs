@@ -10,20 +10,20 @@ export default defineConfig([
     },
     extends: ["js/recommended"],
     languageOptions: {
-      // A configuração correta que inclui Node.js
       globals: {
         ...globals.browser,
-        ...globals.node, 
+        ...globals.node,
       },
     },
+  
     rules: {
       "no-unused-vars": [
         "error",
         {
-          args: "after-used",
-          argsIgnorePattern: "^_",
-        },
-      ],
-    },
+          "args": "after-used",
+          "argsIgnorePattern": "^_"
+        }
+      ]
+    }
   },
 ]);
